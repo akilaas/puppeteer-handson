@@ -4,7 +4,7 @@
   "description": "Regression tests using Puppeteer",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 0 regression-tests/offline-test.js"
+    "test": "mocha --timeout 0 regression-tests/devices-test.js"
   },
   "repository": {
     "type": "git",
