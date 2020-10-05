@@ -13,7 +13,7 @@ describe('Network coverage', async () => {
             slowMo: 100
         });
         page = await browser.newPage();
-        await page.goto("https://v8.dev/", {waitUntil: "networkidle0"});
+
         client = await page.target().createCDPSession();
         await client.send("Network.enable");
 
@@ -34,12 +34,13 @@ describe('Network coverage', async () => {
         await client.send("Network.emulateNetworkConditions", fast3G);
         await client.send("Emulation.setCPUThrottlingRate", {rate: 4});
         await page.emulate(puppeteer.devices["iPhone 8"]);
+        await page.goto("https://v8.dev/", {waitUntil: "networkidle0"});
         const content = await page.$eval('#main h2',
             cont => cont.textContent);
         expect(content).equals('Latest blog posts');
     });
 
-    it.skip('should emulate iphone8 in aeroplane mode?', async () => {
+    it.only('should emulate iphone8 in aeroplane mode?', async () => {
         const aeroMode = {
             // Network connectivity is absent
             offline: true,
@@ -50,13 +51,14 @@ describe('Network coverage', async () => {
             // Latency (ms)
             latency: 0,
         }
-        //simulate network throttling for fast 3g
-        await page.emulate(puppeteer.devices["iPhone 8"]);
+        //simulate network throttling for aeroplane mode
         await client.send("Network.emulateNetworkConditions", aeroMode);
-        await page.reload({waitUntil: "networkidle0"});
-        const content = await page.$eval('#main h2',
+        await page.emulate(puppeteer.devices["iPhone 8"]);
+        await page.goto("https://chromedevtools.github.io/devtools-protocol/", {waitUntil: "networkidle0"});
+        await page.waitFor(5000);
+        const content = await page.$eval('.error-code',
             cont => cont.textContent);
-        expect(content).equals('Latest blog posts');
+        expect(content).equals('ERR_INTERNET_DISCONNECTED');
     });
 
     it('should emulate galaxy in slow3g mode', async () => {
@@ -74,6 +76,7 @@ describe('Network coverage', async () => {
         await client.send("Network.emulateNetworkConditions", slow3G);
         await client.send("Emulation.setCPUThrottlingRate", {rate: 4});
         await page.emulate(puppeteer.devices["Galaxy S5"]);
+        await page.goto("https://v8.dev/", {waitUntil: "networkidle0"});
         const content = await page.$eval('#main h2',
             cont => cont.textContent);
         expect(content).equals('Latest blog posts');
